@@ -14,32 +14,26 @@ jobs:
           submodules: 'recursive'
           fetch-depth: '0'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          log-accepted-android-sdk-licenses: false
-
-      - name: Install NDK
-        run: |
-          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "ndk;25.1.8937393"
-
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Build APK
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Build APK with Gradle
         run: |
           cd ${{ github.workspace }}/V2rayNG
-          echo "sdk.dir=${$ANDROID_HOME}" > local.properties
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew :app:assemblePlaystoreDebug
 
       - name: Upload arm64-v8a APK
         uses: actions/upload-artifact@v4
         if: ${{ success() }}
         with:
           name: Trikolor-arm64-v8a
-          path: ${{ github.workspace }}/V2rayNG/app/build/outputs/apk/*/debug/*arm64-v8a*.apk
+          path: ${{ github.workspace }}/V2rayNG/app/build/outputs/apk/playstore/debug/*arm64-v8a*.apk
           
